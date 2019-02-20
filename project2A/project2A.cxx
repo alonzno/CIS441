@@ -219,14 +219,18 @@ class vtk441Mapper : public vtkOpenGLPolyDataMapper
    }
 };
 
-//void setColors(unsigned char *color_map, float color, unsigned char *buff) {
-//    buff = color_map[256 * color];
-// Drawing the white box
+/* DrawBox
+* 
+* Draws a 20x20x20 white box centered on (0,0,0)
+*
+*/
 void DrawBox(void) {
     unsigned char paths[16] = {0, 1, 3, 2,
                                6, 2, 0, 4,
                                5, 4, 6, 7,
                                3, 7, 5, 1};
+
+    glDisable(GL_TEXTURE_1D);
 
     for (int i = 0; i < 4; i++) {
         glBegin(GL_LINE_STRIP);
@@ -260,6 +264,7 @@ class vtk441MapperPart1 : public vtk441Mapper
       RemoveVTKOpenGLStateSideEffects();
       
       glEnable(GL_COLOR_MATERIAL);
+      glDisable(GL_TEXTURE_1D);
       SetupLight();
 
       // Write all the triangles
@@ -308,11 +313,30 @@ class vtk441MapperPart2 : public vtk441Mapper
    {
        RemoveVTKOpenGLStateSideEffects();
        SetupLight();
-       glBegin(GL_TRIANGLES);
-       glVertex3f(-10, -10, -10);
-       glVertex3f(10, -10, 10);
-       glVertex3f(10, 10, 10);
-       glEnd();
+      
+       glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, c_map);
+       glEnable(GL_COLOR_MATERIAL);
+       //glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+       glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+       glEnable(GL_TEXTURE_1D);
+
+      // Write all the triangles
+      glBegin(GL_TRIANGLES);
+      {
+        unsigned char *buff;
+
+        for (Triangle t: tris) {
+            for (int i = 0; i < 3; i++) {
+                glTexCoord1f(t.fieldValue[i]);
+                glNormal3f(t.normals[i][0], t.normals[i][1], t.normals[i][2]);
+                glVertex3f(t.X[i], t.Y[i], t.Z[i]);
+            }
+        }
+      } 
+      glEnd();
+      
+      // Drawing the white box
+      DrawBox();
    }
 };
 

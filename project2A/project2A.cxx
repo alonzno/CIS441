@@ -43,7 +43,9 @@
 #include <vtkDoubleArray.h>
 #include <vtkCellArray.h>
 
+//I add
 #include <tgmath.h>
+#include <set>
 
 
 class Triangle
@@ -219,7 +221,26 @@ class vtk441Mapper : public vtkOpenGLPolyDataMapper
 
 //void setColors(unsigned char *color_map, float color, unsigned char *buff) {
 //    buff = color_map[256 * color];
-//}
+// Drawing the white box
+void DrawBox(void) {
+    unsigned char paths[16] = {0, 1, 3, 2,
+                               6, 2, 0, 4,
+                               5, 4, 6, 7,
+                               3, 7, 5, 1};
+
+    for (int i = 0; i < 4; i++) {
+        glBegin(GL_LINE_STRIP);
+        glColor3ub(255, 255, 255);
+        for (int j = 0; j < 4; j++) {
+            float a[3] = {10.0f, 10.0f, 10.0f};
+            if (paths[i*4 + j] & 4) a[0] = -10.0f;
+            if (paths[i*4 + j] & 2) a[1] = -10.0f;
+            if (paths[i*4 + j] & 1) a[2] = -10.0f;
+            glVertex3f(a[0], a[1], a[2]);
+        }
+        glEnd();
+    }
+}
 
 class vtk441MapperPart1 : public vtk441Mapper
 {
@@ -241,24 +262,24 @@ class vtk441MapperPart1 : public vtk441Mapper
       glEnable(GL_COLOR_MATERIAL);
       SetupLight();
 
-      //glEnable(GL_COLOR_MATERIAL);
+      // Write all the triangles
       glBegin(GL_TRIANGLES);
-      unsigned char *buff;
-      for (Triangle t: tris) {
-          buff = &c_map[3 * (int) roundf(255 * t.fieldValue[0])];
-          glColor3ub(buff[0], buff[1], buff[2]);
-          //glColor3ub(255, 0, 0);
-          glVertex3f(t.X[0], t.Y[0], t.Z[0]);
-          
-          buff = &c_map[3 * (int) roundf(255 * t.fieldValue[1])];
-          glColor3ub(buff[0], buff[1], buff[2]);
-          glVertex3f(t.X[1], t.Y[1], t.Z[1]);
-          
-          buff = &c_map[3 * (int) roundf(255 * t.fieldValue[2])];
-          glColor3ub(buff[0], buff[1], buff[2]);
-          glVertex3f(t.X[2], t.Y[2], t.Z[2]);
-      }
+      {
+        unsigned char *buff;
+
+        for (Triangle t: tris) {
+            for (int i = 0; i < 3; i++) {
+                buff = &c_map[3 * (int) roundf(255 * t.fieldValue[i])];
+                glColor3ub(buff[0], buff[1], buff[2]);
+                glNormal3f(t.normals[i][0], t.normals[i][1], t.normals[i][2]);
+                glVertex3f(t.X[i], t.Y[i], t.Z[i]);
+            }
+        }
+      } 
       glEnd();
+
+      // Drawing the white box
+      DrawBox();
    }
 };
 

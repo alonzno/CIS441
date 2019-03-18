@@ -1,0 +1,3 @@
+/Users/alonzoaltamirano/Documents/UO_Coursework/CIS441/project2B/CMakeFiles/rebuild_cache.dir
+/Users/alonzoaltamirano/Documents/UO_Coursework/CIS441/project2B/CMakeFiles/edit_cache.dir
+/Users/alonzoaltamirano/Documents/UO_Coursework/CIS441/project2B/CMakeFiles/project2B.dir
